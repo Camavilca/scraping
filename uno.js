@@ -4,7 +4,6 @@ const jsonexport = require("jsonexport");
 
 let JSONPush = [];
 
-
 const init = async (url) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -16,13 +15,18 @@ const init = async (url) => {
   );
   await page.close();
   await browser.close();
-  const arrayFirst = paginations[paginations.length - 2].split('/');
-  const arraySecond = arrayFirst[arrayFirst.length - 1].split('-');
-  const sizePagina = arraySecond[arraySecond.length - 1].split('.')[0];
-  const rutas = builRuta(sizePagina, url);
+  const sizep = sizePagina(paginations);
+  const rutas = builRuta(sizep, url);
   for (let i = 0; i < rutas.length; i++) {
+    console.log(rutas[i]);
     await scraper(rutas[i]);
   }
+}
+
+const sizePagina = paginations => {
+  const arrayFirst = paginations[paginations.length - 2].split('/');
+  const arraySecond = arrayFirst[arrayFirst.length - 1].split('-');
+  return arraySecond[arraySecond.length - 1].split('.')[0];
 }
 
 const builRuta = async (paginas, url) => {
@@ -43,6 +47,7 @@ const builRuta = async (paginas, url) => {
 
 const scraper = async (url) => {
   let JSONData = await URLResponse(url);
+  console.log(JSONData);
   let JSONdetalle;
   for (let i = 0; i < JSONData.length; i++) {
     const { url } = JSONData[i];
