@@ -3,50 +3,75 @@ const jsonfile = require("jsonfile");
 const jsonexport = require("jsonexport");
 
 let JSONPush = [];
-let JSONItemPage = [];
 
 const init = async url => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
-  const arrayURL = await page.evaluate(() =>
+  const paginations = await page.evaluate(() =>
     [...document.querySelectorAll("ul.pagination li>a")].map(e => e.href)
   );
   await page.close();
   await browser.close();
-  const sizepaginaciones = funSizePaginacion(arrayURL);
-  const paginaciones = await builRutasPaginacion(sizepaginaciones, url);
-  builFile(paginaciones, "paginaciones");
-  let urlItems;
-  for (let i = 0; i < paginaciones.length; i++) {
-    urlItems = await URLItemsPage(paginaciones[i]);
-    JSONItemPage.push(urlItems);
+  const sizep = sizePagina(paginations);
+  const rutas = await builRuta(sizep, url);
+  console.log(rutas);
+  for (let i = 0; i < rutas.length; i++) {
+    await scraper(rutas[i]);
   }
-  builFile(JSONItemPage, "urls");
 };
 
-// const scraper = async url => {
-//   let urls = await URLItemsPage(url);
-//   let JSONdetalle;
-//   for (let i = 0; i < JSONData.length; i++) {
-//     const { url } = JSONData[i];
-//     JSONdetalle = await URLSecond(url);
-//     JSONPush.push({ url: url, data: JSONdetalle });
-//   }
-// };
+const sizePagina = paginations => {
+  const arrayFirst = paginations[paginations.length - 2].split("/");
+  const arraySecond = arrayFirst[arrayFirst.length - 1].split("-");
+  return arraySecond[arraySecond.length - 1].split(".")[0];
+};
 
-const URLItemsPage = async url => {
+const builRuta = async (paginas, url) => {
+  var rutas = [];
+  var ruta = "";
+  var part = "-pagina-";
+  var firstURL = url.split(".html")[0];
+  rutas.push(firstURL + ".html");
+  for (let i = 2; i <= paginas; i++) {
+    ruta = firstURL + part + i + ".html";
+    rutas.push(ruta);
+  }
+  jsonfile.writeFile("rutas.json", rutas);
+  return rutas;
+};
+
+const scraper = async url => {
+  let JSONData = await URLResponse(url, );
+  console.log(JSONData);
+  let JSONdetalle;
+  for (let i = 0; i < JSONData.length; i++) {
+    const { url } = JSONData[i];
+    JSONdetalle = await URLSecond(url);
+    JSONPush.push({ url: url, data: JSONdetalle });
+  }
+};
+
+const URLResponse = async url => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
   const node = await page.evaluate(() => {
-    return [...document.querySelectorAll("div.wrapper a")].map(elem => ({
+    var div = "div";
+    var type = ".";
+    var clearfix = "clearfix";
+    var a = "a";
+    var name = ".logo-empresa";
+    return [
+      ...document.querySelectorAll(div + type + clearfix + " " + a + name)
+    ].map(elem => ({
       url: elem.href,
       type: "link"
     }));
   });
   await page.close();
   await browser.close();
+  jsonfile.writeFile("url.json", node);
   return node;
 };
 
@@ -84,30 +109,13 @@ const URLSecond = async url => {
   return node;
 };
 
-const builFile = (data, name) => {
-  jsonfile.writeFile(name + ".json", data);
-};
-
-const funSizePaginacion = urlPaginacion => {
-  const arrayFirst = urlPaginacion[urlPaginacion.length - 2].split("/");
-  const arraySecond = arrayFirst[arrayFirst.length - 1].split("-");
-  return arraySecond[arraySecond.length - 1].split(".")[0];
-};
-
-const builRutasPaginacion = async (paginas, url) => {
-  var rutas = [];
-  var ruta = "";
-  var part = "-pagina-";
-  var firstURL = url.split(".html")[0];
-  rutas.push(firstURL + ".html");
-  for (let i = 2; i <= paginas; i++) {
-    ruta = firstURL + part + i + ".html";
-    rutas.push(ruta);
-  }
-  return rutas;
+const builJSON = JSONPush => {
+  jsonfile.writeFile("example.json", JSONPush);
 };
 
 init("https://www.bumeran.com.pe/empleos-busqueda-jefe-de-sistemas.html");
+
+// builJSON(JSONPush);
 
 /**
  * ------------------------------------------------------------
