@@ -110,8 +110,7 @@ const URLSecond = async url => {
 };
 
 const builFile = (data, name) => {
-  // jsonfile.writeFile(name + ".json", data);
-  console.log("gg");
+  jsonfile.writeFile(name + ".json", data);
 };
 
 const funSizePaginacion = urlPaginacion => {
