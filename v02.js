@@ -23,28 +23,35 @@ const init = async url => {
     JSONItemPage.push(urlItems);
   }
   builFile(JSONItemPage, "urls");
+  logicaData(JSONItemPage);
 };
 
-// const scraper = async url => {
-//   let urls = await URLItemsPage(url);
-//   let JSONdetalle;
-//   for (let i = 0; i < JSONData.length; i++) {
-//     const { url } = JSONData[i];
-//     JSONdetalle = await URLSecond(url);
-//     JSONPush.push({ url: url, data: JSONdetalle });
-//   }
-// };
+const logicaData = async data => {
+  let detalle;
+  for (let i = 0; i < data.length; i++) {
+    for (let e = 0; e < data[i].length; e++) {
+      const { url } = data[i][e];
+      detalle = await URLSecond(url);
+      JSONPush.push({ url: url, data: detalle });
+    }
+  }
+  builFile(JSONPush, "detalle");
+};
 
 const URLItemsPage = async url => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
+  console.log(url);
   const node = await page.evaluate(() => {
-    return [...document.querySelectorAll("div.wrapper a")].map(elem => ({
+    return [
+      ...document.querySelectorAll('div.wrapper a[href^="/empleos"]')
+    ].map(elem => ({
       url: elem.href,
       type: "link"
     }));
   });
+  console.log(node);
   await page.close();
   await browser.close();
   return node;
@@ -117,7 +124,7 @@ init("https://www.bumeran.com.pe/empleos-busqueda-jefe-de-sistemas.html");
  * ------------------------------------------------------------
  * QUERY DIFERENT
  * [...document.querySelectorAll('div.aviso_specs h2')].map(elem => ({
- *   [elem.innerText]: elem.innerText
+ * *  [elem.innerText]: elem.innerText
  * }));
  * -------------------------------------------------------------
  */
