@@ -1,6 +1,5 @@
 const puppeteer = require("puppeteer");
-const jsonfile = require("jsonfile");
-const jsonexport = require("jsonexport");
+const { Parser } = require("json2csv");
 
 let JSONPush = [];
 let JSONItemPage = [];
@@ -37,6 +36,25 @@ const logicaData = async data => {
   }
   builFile(JSONPush, "detalle");
 };
+
+const builFileCSV = data => {
+
+  const fields = [
+    'url',
+    'data.detalle.Lugar de Trabajo:',
+    'data.detalle.Publicado:',
+    'data.detalle.Salario',
+    'data.detalle.Tipo de puesto:',
+    'data.detalle.Área:',
+  ];
+
+  const json2csvParser = new Parser({ fields, unwind: ['data', 'data.detalle'] });
+  const csv = json2csvParser.parse(data);
+
+  console.log(csv);
+
+}
+
 
 const URLItemsPage = async url => {
   const browser = await puppeteer.launch();
@@ -92,7 +110,8 @@ const URLSecond = async url => {
 };
 
 const builFile = (data, name) => {
-  jsonfile.writeFile(name + ".json", data);
+  // jsonfile.writeFile(name + ".json", data);
+  console.log("gg");
 };
 
 const funSizePaginacion = urlPaginacion => {

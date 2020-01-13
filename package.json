@@ -9,6 +9,11 @@
   "author": "orlando camavilca",
   "license": "ISC",
   "dependencies": {
+    "@aternus/csv-to-xlsx": "^1.0.12",
+    "csv-writer": "^1.5.0",
+    "fast-csv": "^4.0.2",
+    "json2csv": "^4.5.4",
+    "json2xls": "^0.1.2",
     "jsonexport": "^2.4.1",
     "jsonfile": "^5.0.0",
     "puppeteer": "^2.0.0"
