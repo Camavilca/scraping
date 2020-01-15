@@ -1,38 +1,34 @@
 const puppeteer = require("puppeteer");
 const { Parser } = require("json2csv");
-const jsonfile = require('jsonfile');
+const fs = require("fs-extra");
+const jsonfile = require('jsonfile')
+
 
 let JSONPush = [];
 let JSONItemPage = [];
 
-const init = async url => {
+const init = async (url, nameSearch) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
-
-  /** code init */
   const arrayURL = await page.evaluate(() =>
     [...document.querySelectorAll("ul.pagination li>a")].map(e => e.href)
   );
-  /** code end */
   await page.close();
   await browser.close();
-
-
   const sizepaginaciones = funSizePaginacion(arrayURL);
   const paginaciones = await builRutasPaginacion(sizepaginaciones, url);
-
-  builFile(paginaciones, "paginaciones");
+  builFile(paginaciones, "paginaciones", nameSearch);
   let urlItems;
   for (let i = 0; i < paginaciones.length; i++) {
     urlItems = await URLItemsPage(paginaciones[i]);
     JSONItemPage.push(urlItems);
   }
-  builFile(JSONItemPage, "urls");
-  logicaData(JSONItemPage);
+  builFile(JSONItemPage, "urls", nameSearch);
+  logicaData(JSONItemPage, nameSearch);
 };
 
-const logicaData = async data => {
+const logicaData = async (data, nameSearch) => {
   let detalle;
   for (let i = 0; i < data.length; i++) {
     for (let e = 0; e < data[i].length; e++) {
@@ -41,7 +37,7 @@ const logicaData = async data => {
       JSONPush.push({ url: url, data: detalle });
     }
   }
-  builFile(JSONPush, "detalle");
+  builFile(JSONPush, "detalle", nameSearch);
 };
 
 const URLItemsPage = async url => {
@@ -97,8 +93,8 @@ const URLSecond = async url => {
   return node;
 };
 
-const builFile = (data, name) => {
-  jsonfile.writeFile(name + ".json", data);
+const builFile = (data, name, nameSearch) => {
+  jsonfile.writeFile(name + nameSearch + ".json", data);
 };
 
 const funSizePaginacion = urlPaginacion => {
@@ -120,7 +116,7 @@ const builRutasPaginacion = async (paginas, url) => {
   return rutas;
 };
 
-init("https://www.bumeran.com.pe/empleos-busqueda-jefe-de-operaciones.html");
+init("https://www.bumeran.com.pe/empleos-busqueda-jefe-de-sistemas.html", "jefesistemas");
 
 /**
  * ------------------------------------------------------------
